@@ -4,8 +4,8 @@
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 
-using AppMotor.Core.Processes;
-using AppMotor.TestCore;
+using AppMotor.CoreKit.Processes;
+using AppMotor.TestKit;
 
 using JetBrains.Annotations;
 
@@ -142,7 +142,7 @@ public sealed class EndToEndTests
             bool ignoreExitCode = false
         )
     {
-        var startInfo = new ChildProcessStartInfo(processFileName, arguments ?? new())
+        var startInfo = new ChildProcessStartInfo(processFileName, arguments ?? [])
         {
             WorkingDirectory = workingDirectory ?? this._projectDir,
             ProcessTimeout = TestEnvInfo.RunsInCiPipeline ? TimeSpan.FromMinutes(10) : TimeSpan.FromMinutes(1),
