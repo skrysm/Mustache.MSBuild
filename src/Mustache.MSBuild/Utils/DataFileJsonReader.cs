@@ -1,7 +1,7 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright Mustache.MSBuild (https://github.com/skrysmanski/Mustache.MSBuild)
 
-using AppMotor.NetStandardCompat.Extensions;
+using AppMotor.NetStandardCompatKit.Extensions;
 
 using JetBrains.Annotations;
 

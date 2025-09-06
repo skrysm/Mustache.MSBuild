@@ -88,15 +88,16 @@
        (e.g. "Stubble.Core").
   -->
   <ItemGroup>
-    <PackageReference Include="AppMotor.NetStandardCompat" Version="0.1.0" />
-    <PackageReference Include="Costura.Fody" Version="5.7.0">
+    <PackageReference Include="AppMotor.NetStandardCompatKit" Version="0.2.2" />
+    <PackageReference Include="Costura.Fody" Version="6.0.0">
       <!-- This is a dev dependency. -->
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.3.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.14.8" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Stubble.Core" Version="1.10.8" />
-    <PackageReference Include="System.IO.Abstractions" Version="17.2.3" />
+    <PackageReference Include="TestableIO.System.IO.Abstractions" Version="22.0.15" />
+    <PackageReference Include="TestableIO.System.IO.Abstractions.Wrappers" Version="22.0.15" />
   </ItemGroup>
 
 </Project>

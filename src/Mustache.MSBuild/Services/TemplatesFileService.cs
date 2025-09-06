@@ -5,7 +5,7 @@ using System.IO.Abstractions;
 using System.Runtime.Serialization;
 using System.Text;
 
-using AppMotor.NetStandardCompat.Extensions;
+using AppMotor.NetStandardCompatKit.Extensions;
 
 using JetBrains.Annotations;
 

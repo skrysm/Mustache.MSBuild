@@ -3,7 +3,7 @@
   <Import Project="$(ProjectCommonsDirectory)Project.Tests.props" />
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
 
     <RootNamespace>Mustache.MSBuild</RootNamespace>
   </PropertyGroup>

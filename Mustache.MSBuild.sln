@@ -29,9 +29,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_ProjectCommons", "_Project
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{32140DA4-CE8A-43BC-B6BF-256C90495E1E}"
-	ProjectSection(SolutionItems) = preProject
-		src\.editorconfig = src\.editorconfig
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{80C6C1F6-CB66-493B-B8E1-276D4CCFB170}"
 EndProject

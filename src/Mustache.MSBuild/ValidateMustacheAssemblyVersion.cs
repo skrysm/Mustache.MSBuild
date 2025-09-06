@@ -3,7 +3,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-using AppMotor.NetStandardCompat.Extensions;
+using AppMotor.NetStandardCompatKit.Extensions;
 
 using JetBrains.Annotations;
 
@@ -44,7 +44,7 @@ public sealed class ValidateMustacheAssemblyVersion : Task
         }
 
         // For something like "0.3.0-preview1", only parse "0.3.0".
-        expectedVersionAsString = expectedVersionAsString.Split(new[] { '-' }, count: 2, StringSplitOptions.RemoveEmptyEntries)[0];
+        expectedVersionAsString = expectedVersionAsString.Split(['-'], count: 2, StringSplitOptions.RemoveEmptyEntries)[0];
 
         if (!Version.TryParse(expectedVersionAsString, out var expectedVersion))
         {
