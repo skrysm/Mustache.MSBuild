@@ -96,11 +96,8 @@
   -->
   <ItemGroup>
     <PackageReference Include="AppMotor.NetStandardCompatKit" Version="0.2.2" />
-    <PackageReference Include="Costura.Fody" Version="6.0.0">
-      <!-- This is a dev dependency. -->
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.14.8" />
+    <PackageReference Include="Costura.Fody" Version="6.0.0" PrivateAssets="all"/>
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.14.8" PrivateAssets="all" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Stubble.Core" Version="1.10.8" />
     <PackageReference Include="TestableIO.System.IO.Abstractions" Version="22.0.15" />

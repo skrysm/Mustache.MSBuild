@@ -4,9 +4,6 @@
 using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 
-using JetBrains.Annotations;
-
-using Microsoft.Build.Framework;
 using Moq;
 
 using Mustache.MSBuild.Utils;
@@ -39,7 +36,7 @@ public sealed class RenderMustacheTemplatesSurrogateTests
 
         var templatePaths = new[]
         {
-            CreateMsBuildTaskItem(templateFile),
+            templateFile,
         };
 
         var logger = new MsBuildTestLogger();
@@ -88,7 +85,7 @@ public sealed class RenderMustacheTemplatesSurrogateTests
 
         var templatePaths = new[]
         {
-            CreateMsBuildTaskItem(templateFile),
+            templateFile,
         };
 
         var logger = new MsBuildTestLogger();
@@ -138,7 +135,7 @@ public sealed class RenderMustacheTemplatesSurrogateTests
 
         // Test
         task.Execute(null, logger).ShouldBe(true);
-        task.Execute(Array.Empty<ITaskItem>(), logger).ShouldBe(true);
+        task.Execute(Array.Empty<string>(), logger).ShouldBe(true);
 
         // Verify
         logger.Exceptions.ShouldBeEmpty();
@@ -156,8 +153,8 @@ public sealed class RenderMustacheTemplatesSurrogateTests
 
         var templatePaths = new[]
         {
-            CreateMsBuildTaskItem(templateFile1),
-            CreateMsBuildTaskItem(templateFile2),
+            templateFile1,
+            templateFile2,
         };
 
         var logger = new MsBuildTestLogger();
@@ -192,8 +189,8 @@ public sealed class RenderMustacheTemplatesSurrogateTests
 
         var templatePaths = new[]
         {
-            CreateMsBuildTaskItem(templateFile1),
-            CreateMsBuildTaskItem(templateFile2),
+            templateFile1,
+            templateFile2,
         };
 
         var logger = new MsBuildTestLogger();
@@ -222,7 +219,7 @@ public sealed class RenderMustacheTemplatesSurrogateTests
 
         var templatePaths = new[]
         {
-            CreateMsBuildTaskItem("/templates/MyFile.txt.mustache"),
+            "/templates/MyFile.txt.mustache",
         };
 
         var logger = new MsBuildTestLogger();
@@ -236,18 +233,6 @@ public sealed class RenderMustacheTemplatesSurrogateTests
         logger.Warnings.ShouldBeEmpty();
         logger.Exceptions.Count.ShouldBe(1);
         logger.Exceptions[0].ShouldBeAssignableTo<MockException>();
-    }
-
-    [MustUseReturnValue]
-    private static ITaskItem CreateMsBuildTaskItem(string path)
-    {
-        var templateFileMock = new Mock<ITaskItem>(MockBehavior.Strict);
-
-        templateFileMock
-            .Setup(m => m.ItemSpec)
-            .Returns(path);
-
-        return templateFileMock.Object;
     }
 
     private sealed class MsBuildTestLogger : IMsBuildLogger

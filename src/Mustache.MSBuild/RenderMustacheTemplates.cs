@@ -38,6 +38,6 @@ public sealed class RenderMustacheTemplates : Task
     /// <inheritdoc />
     public override bool Execute()
     {
-        return s_surrogateTask.Execute(this.TemplatePaths, new MsBuildLogger(this.Log));
+        return s_surrogateTask.Execute(this.TemplatePaths?.Select(item => item.ItemSpec), new MsBuildLogger(this.Log));
     }
 }
