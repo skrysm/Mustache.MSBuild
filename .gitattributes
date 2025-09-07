@@ -1,46 +1,99 @@
-# Prevent git from messing around with line endings.
+##############################################################################
+#
+# Defines Git attributes (text, binary, lfs, ...) for various file extensions.
+#
+# Official documentation: https://git-scm.com/docs/gitattributes
+#
+# File pattern format: https://git-scm.com/docs/gitignore#_pattern_format
+#
+##############################################################################
+#
+# NOTE: To re-apply all changes in this file to the current repository, run:
+#
+#  1. git-clean.cmd/.sh
+#  2. git rm --cached -r .
+#  3. git add -A
+#
+# NOTE: On Windows, you need to restore the Linux executable bit after doing this via:
+#
+#   git add --chmod=+x <file>
+#
+# For details for each file, use:
+#
+#   git status -v
+#
+##############################################################################
+
+# Prevent git from messing around with line endings (i.e. treat all files as binary by default).
 * -text
+
+# Enforce CRLF line endings for C# files. Prevents accidental commits with mixed line endings.
+# For details on this and an explanation why "crlf", see: https://manski.net/articles/dotnet/line-endings
+*.cs text eol=crlf
 
 # NOTE: Visual Studio does not respect the end-of-line settings in
 #   .editorconfig for .csproj files. So, we let git handle this and
 #   just say that the end-of-line characters should match the platform
-#   (Windows or Linx/Unix/macOS). See .editorconfig for more details.
+#   (Windows or Linux/Unix/macOS). See .editorconfig for more details.
 *.csproj text=auto
 
-# Store binary files in git-lfs
-**/*.exe filter=lfs diff=lfs merge=lfs -text
-**/*.dll filter=lfs diff=lfs merge=lfs -text
+#
+# Binary files - stored in git-lfs
+#
 
-**/*.gif filter=lfs diff=lfs merge=lfs -text
-**/*.png filter=lfs diff=lfs merge=lfs -text
-**/*.jpg filter=lfs diff=lfs merge=lfs -text
-**/*.jpeg filter=lfs diff=lfs merge=lfs -text
-**/*.tif filter=lfs diff=lfs merge=lfs -text
-**/*.bmp filter=lfs diff=lfs merge=lfs -text
-**/*.ico filter=lfs diff=lfs merge=lfs -text
-**/*.cur filter=lfs diff=lfs merge=lfs -text
+## Application files
+**/*.exe filter=lfs diff=lfs merge=lfs
+**/*.dll filter=lfs diff=lfs merge=lfs
 
-**/*.avi filter=lfs diff=lfs merge=lfs -text
-**/*.mpg filter=lfs diff=lfs merge=lfs -text
-**/*.mpeg filter=lfs diff=lfs merge=lfs -text
+## Image files
+**/*.gif filter=lfs diff=lfs merge=lfs
+**/*.png filter=lfs diff=lfs merge=lfs
+**/*.jpg filter=lfs diff=lfs merge=lfs
+**/*.jpeg filter=lfs diff=lfs merge=lfs
+**/*.tif filter=lfs diff=lfs merge=lfs
+**/*.bmp filter=lfs diff=lfs merge=lfs
+**/*.ico filter=lfs diff=lfs merge=lfs
+**/*.cur filter=lfs diff=lfs merge=lfs
 
-**/*.wav filter=lfs diff=lfs merge=lfs -text
-**/*.mp3 filter=lfs diff=lfs merge=lfs -text
-**/*.m4a filter=lfs diff=lfs merge=lfs -text
+## Movie files
+**/*.avi filter=lfs diff=lfs merge=lfs
+**/*.mpg filter=lfs diff=lfs merge=lfs
+**/*.mpeg filter=lfs diff=lfs merge=lfs
 
-**/*.zip filter=lfs diff=lfs merge=lfs -text
-**/*.gz filter=lfs diff=lfs merge=lfs -text
+## Audio files
+**/*.wav filter=lfs diff=lfs merge=lfs
+**/*.mp3 filter=lfs diff=lfs merge=lfs
+**/*.m4a filter=lfs diff=lfs merge=lfs
 
-**/*.ttf filter=lfs diff=lfs merge=lfs -text
+## Archive files
+**/*.zip filter=lfs diff=lfs merge=lfs
+**/*.gz filter=lfs diff=lfs merge=lfs
 
-**/*.doc filter=lfs diff=lfs merge=lfs -text
-**/*.docx filter=lfs diff=lfs merge=lfs -text
-**/*.xls filter=lfs diff=lfs merge=lfs -text
-**/*.xlsx filter=lfs diff=lfs merge=lfs -text
-**/*.ppt filter=lfs diff=lfs merge=lfs -text
-**/*.pptx filter=lfs diff=lfs merge=lfs -text
-**/*.pdf filter=lfs diff=lfs merge=lfs -text
-**/*.xps filter=lfs diff=lfs merge=lfs -text
-**/*.rtf filter=lfs diff=lfs merge=lfs -text
+## Font files
+**/*.ttf filter=lfs diff=lfs merge=lfs
+**/*.otf filter=lfs diff=lfs merge=lfs
+**/*.woff filter=lfs diff=lfs merge=lfs
+**/*.woff2 filter=lfs diff=lfs merge=lfs
 
-**/*.bin filter=lfs diff=lfs merge=lfs -text
+## Office documents
+**/*.doc filter=lfs diff=lfs merge=lfs
+**/*.docx filter=lfs diff=lfs merge=lfs
+**/*.xls filter=lfs diff=lfs merge=lfs
+**/*.xlsx filter=lfs diff=lfs merge=lfs
+**/*.ppt filter=lfs diff=lfs merge=lfs
+**/*.pptx filter=lfs diff=lfs merge=lfs
+**/*.pdf filter=lfs diff=lfs merge=lfs
+**/*.xps filter=lfs diff=lfs merge=lfs
+**/*.rtf filter=lfs diff=lfs merge=lfs
+
+## Other binary files
+**/*.bin filter=lfs diff=lfs merge=lfs
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+# Exclude files from GitHub's language statistics
+# https://github.com/github-linguist/linguist/blob/master/docs/overrides.md#vendored-code
+
+# Helper scripts present in most repositories
+/git-clean.* linguist-vendored
+/git-clone-submodules.* linguist-vendored

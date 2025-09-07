@@ -1,11 +1,16 @@
+##############################################################################
 #
-# This file list paths that are ignored by git.
+# This file defines paths/files that are ignored by Git.
 #
-# Tutorial: https://www.atlassian.com/git/tutorials/saving-changes/gitignore
+# Tutorial: https://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository#_ignoring
 #
-# GitIgnore files for various project types: https://github.com/github/gitignore
+# File pattern format: https://git-scm.com/docs/gitignore#_pattern_format
 #
-
+# Useful .gitignore templates: https://github.com/github/gitignore
+#
+# Official documentation: https://git-scm.com/docs/gitignore
+#
+##############################################################################
 
 #
 # Common ignores
@@ -19,6 +24,8 @@
 # See: https://en.wikipedia.org/wiki/.DS_Store
 .DS_Store
 
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #
 # Visual Studio ignores
@@ -34,6 +41,9 @@
 **/bin/Release/
 # Build intermediate directories
 **/obj/
+
+# Test results from 'dotnet test'
+**/TestResults/*.trx
 
 # ReSharper cache
 _ReSharper.Caches/

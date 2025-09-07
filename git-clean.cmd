@@ -11,5 +11,8 @@ echo.
 ::   deleted (for example, the "bin/Debug" directories in C# projects).
 git clean -f -d -x "%~dp0\"
 
+:: Clean all submodules. (The above command only cleans the current repo.)
+git submodule foreach --recursive git clean -f -d -x
+
 echo.
 pause
