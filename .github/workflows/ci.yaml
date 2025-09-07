@@ -1,37 +1,67 @@
+﻿#
+# Builds and tests the code in this repository.
 #
-# GitHub Actions workflow: Builds and tests the code in this repository.
-#
-# For more details on workflows, see README.md.
-#
+name: Continuous Integration
 
-# IMPORTANT: When changing this name, also change the name in the trigger section in "test-report.yaml".
-name: CI
-
-# When to run this workflow
-# See: https://docs.github.com/en/actions/reference/events-that-trigger-workflows
-# See: https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#on
 on:
-  # Trigger the workflow on push or pull request, but only for the main branch.
-  # Reason: Until a feature branch is converted into a pull request, there's no (real) need
-  #   to have this workflow waste resources and trigger 'workflow did not work' emails.
   push:
     branches:
       - main
   pull_request:
-    branches:
-      - main
+  workflow_dispatch:  # manual execution
 
 # Permissions for GITHUB_TOKEN for this workflow.
-#   See: https://docs.github.com/en/actions/reference/authentication-in-a-workflow#permissions-for-the-github_token
-# NOTE: Because of this, we don't use "@hash" but "@vX" for non-GitHub steps below. Usually you would use "@hash"
-#   as a security measure to pin a specific version. However, since we run with the minimal permissions
-#   here, malicious code couldn't do much harm (most likely).
-#   See: https://blog.gitguardian.com/github-actions-security-cheat-sheet/#use-specific-action-version-tags
+# NOTES ON PERMiSSIONS: https://manski.net/articles/github/actions/cheat-sheet#security-considerations
+# NOTES ON SECRETS: https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets#using-secrets-in-a-workflow
 permissions:
   contents: read
 
+# NOTE: Jobs run in parallel by default (unless "needs" is defined).
 jobs:
+
+  #
+  # Build & Test job
+  #
   build-and-test:
-    # Name the job
     name: Build & Test
     uses: ./.github/workflows/build-and-test.yaml
+
+  #
+  # Create action test report
+  #
+  # NOTE: This is a separate job (from 'build-and-test') because it needs special write permissions.
+  #
+  test-report:
+    name: Test Report
+    runs-on: ubuntu-latest
+
+    needs: build-and-test
+    # This condition makes sure we publish the test report even if the "run tests" step has failed (because a test has failed).
+    # IMPORTANT: The "!cancelled()" condition is required or else the condition after the "&&" will never be executed!
+    if: ${{ !cancelled() && (needs.build-and-test.result == 'success' || needs.build-and-test.outputs.run_tests_conclusion == 'failure') }}
+
+    permissions:
+      actions: read
+      checks: write
+
+    steps:
+      - name: Create test report
+        uses: dorny/test-reporter@dc3a92680fcc15842eef52e8c4606ea7ce6bd3f3  # version 2.1.1
+        with:
+          # NOTE: We add the 'github.run_number' to the name so that we can easier identify the
+          #   test report if they pile up due to bug https://github.com/dorny/test-reporter/issues/67.
+          #   See top of this file for more details.
+          name: 'Test Report #${{ github.run_number }}'
+          # The name of the artifact (minus extension) created by the CI workflow.
+          artifact: /test-results-(.*)/
+          # Path to test results (inside artifact .zip)
+          path: '**/*.trx'
+          # Format of test results
+          reporter: dotnet-trx
+          # Don't mark the test report generated as failed if there's a failed test.
+          # Only mark it as failed if something with the workflow has actually gone wrong.
+          fail-on-error: false
+          # Workaround for error 'fatal: not a git repository' caused by a call to 'git ls-files'
+          # (This is because this job doesn't checkout any git repository.)
+          # See: https://github.com/dorny/test-reporter/issues/169#issuecomment-1583560458
+          max-annotations: 0

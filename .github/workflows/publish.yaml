@@ -1,0 +1,65 @@
+#
+# Builds the repository and publishes the NuGet packages to nuget.org. Only uploads packages that have not
+# yet been uploaded (based on the package id and package version).
+#
+name: Publish NuGet Packages
+
+on:
+  workflow_dispatch:
+
+# Permissions for GITHUB_TOKEN for this workflow.
+# NOTES ON PERMiSSIONS: https://manski.net/articles/github/actions/cheat-sheet#security-considerations
+# NOTES ON SECRETS: https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets#using-secrets-in-a-workflow
+permissions:
+  contents: read
+
+env:
+  DOTNET_VERSION: '9.0'
+
+# NOTE: Jobs run in parallel by default (unless "needs" is defined).
+jobs:
+
+  #
+  # Build packages
+  #
+  # NOTE: The full build is necessary because the "download-artifact" action (used by the publish job) can't download
+  #   artifacts from other workflow runs. It can only download artifacts from the current workflow run.
+  #
+  build-and-test:
+    name: Build & Test
+    uses: ./.github/workflows/build-and-test.yaml
+
+  #
+  # Publish packages
+  #
+  publish:
+    name: Publish to nuget.org
+    needs: build-and-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Collect NuGet packages from 'Build & Test' job
+        uses: actions/download-artifact@v4
+        with:
+          name: nuget-packages
+          path: artifacts
+
+      - name: Push to nuget.org (idempotent)
+
+        env:
+          #
+          # NuGet prod environment
+          #
+          PUSH_URI: 'nuget.org'
+          API_KEY: "${{ secrets.NUGET_API_KEY }}"  # https://www.nuget.org/account/apikeys
+
+          #
+          # NuGet testing environment (data gets wiped every now and then).
+          #
+          # NOTE: Requires an API key created on https://int.nugettest.org/.
+          # See: https://learn.microsoft.com/en-us/nuget/quickstart/create-and-publish-a-package-using-the-dotnet-cli#publish-with-dotnet-nuget-push
+          #PUSH_URI: 'https://int.nugettest.org/'
+          #API_KEY: "${{ secrets.NUGET_API_KEY_INT }}"  # https://int.nugettest.org/account/apikeys
+
+        # NOTE: GitHub-hosted runners come with .NET preinstalled.
+        run: dotnet nuget push "artifacts/*.nupkg" --api-key "${{ env.API_KEY }}" --skip-duplicate --source "${{ env.PUSH_URI }}"

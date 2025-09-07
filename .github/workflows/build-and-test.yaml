@@ -8,92 +8,111 @@
 #
 name: Build & Test
 
-# When to run this workflow
-# See: https://docs.github.com/en/actions/reference/events-that-trigger-workflows
-# See: https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#on
 on:
   workflow_call:
+    outputs:
+      run_tests_conclusion:
+        value: ${{ jobs.build-and-test.outputs.run_tests_conclusion }}
 
 # Permissions for GITHUB_TOKEN for this workflow.
-#   See: https://docs.github.com/en/actions/reference/authentication-in-a-workflow#permissions-for-the-github_token
-# NOTE: Because of this, we don't use "@hash" but "@vX" for non-GitHub steps below. Usually you would use "@hash"
-#   as a security measure to pin a specific version. However, since we run with the minimal permissions
-#   here, malicious code couldn't do much harm (most likely).
-#   See: https://blog.gitguardian.com/github-actions-security-cheat-sheet/#use-specific-action-version-tags
+# NOTES ON PERMiSSIONS: https://manski.net/articles/github/actions/cheat-sheet#security-considerations
+# NOTES ON SECRETS: https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets#using-secrets-in-a-workflow
 permissions:
   contents: read
 
+env:
+  DOTNET_VERSION: '9.0'
+
+# NOTE: Jobs run in parallel by default (unless "needs" is defined).
 jobs:
   build-and-test:
-    # Name the job
     name: Build & Test
-    # Set the type of machine to run on
-    # See: https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
+
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
 
+    outputs:
+      run_tests_conclusion: ${{ steps.run_tests.conclusion }}
+
     steps:
-      # See: https://github.com/actions/checkout
+      ###########################################################################
+      #
+      # Setup Steps
+      #
+      ###########################################################################
+
       - name: Clone Git repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
         with:
           lfs: true
           submodules: true
 
+      # NOTE: While GitHub-hosted runners come with .NET preinstalled, they ship with the latest LTS version -
+      #   which may not be the version we need. So we explicitly setup .NET here
+      - name: Install .NET build environment
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '${{ env.DOTNET_VERSION }}'  # required parameter
+
       # This creates ${{ steps.short-sha.outputs.sha }} to be used below.
-      # See: https://github.com/marketplace/actions/short-sha
       - name: Determine Git short commit hash
         id: short-sha
-        uses: benjlevesque/short-sha@v1.2
+        uses: benjlevesque/short-sha@599815c8ee942a9616c92bcfb4f947a3b670ab0b  # version 3.0
 
-      # See: https://github.com/actions/setup-dotnet
-      - name: Setup .NET build environment
-        uses: actions/setup-dotnet@v2
-        with:
-          # NOTE: Apparently only the 3rd component can be "x"; i.e. "5.x" is not supported.
-          dotnet-version: '6.0.x'
+
+      ###########################################################################
+      #
+      # Build Steps
+      #
+      ###########################################################################
 
       # See: https://docs.microsoft.com/de-de/dotnet/core/tools/dotnet-build
       # NOTE: Without specifying a solution file, "dotnet build" searches for a .sln file in the current directory.
-      # NOTE 2: "-maxCpuCount:1" seems to be necessary to make sure the NuGet package from the main project is built before
-      #   dotnet build attempts to build the test project (which needs to the NuGet package).
+      # NOTE 2: "-maxCpuCount:1" is necessary to make sure the NuGet package from the main project is built before
+      #   "dotnet build" builds the test project (which needs to the NuGet package).
       - name: Build code
         run: dotnet build --configuration Release -maxCpuCount:1
 
       # See: https://docs.microsoft.com/de-de/dotnet/core/tools/dotnet-test
-      # NOTE: Without specifying a solution file, "dotnet test" searches for a .sln file in the current directory.
-      # NOTE 2: There seems to be no way to name the .trx file as '<project>.trx'. If no 'LogFileName' is specified,
+      # NOTES:
+      # * Without specifying a solution file, "dotnet test" searches for a .sln file in the current directory.
+      # * There seems to be no way to name the .trx file as '<project>.trx'. If no 'LogFileName' is specified,
       #   the .trx files will be named something like "_fv-az278-737_2021-08-15_03_50_33.trx".
+      # * The Option 'TreatNoTestsAsError' is documented here: https://learn.microsoft.com/en-us/visualstudio/test/configure-unit-tests-by-using-a-dot-runsettings-file?view=vs-2022#runconfiguration-element
       - name: Run tests
         id: run_tests
-        run: dotnet test --configuration Release --no-restore --no-build --logger "trx;LogFileName=${{ runner.os }}.trx" --nologo
+        run: dotnet test --configuration Release --no-restore --no-build --logger "trx;LogFileName=${{ runner.os }}.trx" --nologo -- RunConfiguration.TreatNoTestsAsError=true
         env:
           # Tells tests that they're running in a (potentially slow) CI environment.
           RUNS_IN_CI: true
 
-      # See: https://github.com/actions/upload-artifact
-      - name: Upload test results
-        uses: actions/upload-artifact@v3
+      - name: Upload NuGet packages (as .zip file)
+        uses: actions/upload-artifact@v4
+        with:
+          name: 'nuget-packages'
+          path: 'build-packages/*.nupkg'
+          if-no-files-found: error
+
+
+      ###########################################################################
+      #
+      # Archive Steps
+      #
+      ###########################################################################
+
+      - name: Upload test results (as .zip file)
+        uses: actions/upload-artifact@v4
         # Run this step even if "run_tests" has failed (but not if any other previous step has failed - which would
         # be "failure()" - because in this case the tests have not run and thus no .trx files have been generated).
         # See: https://docs.github.com/en/actions/learn-github-actions/expressions#failure
         if: success() || steps.run_tests.conclusion == 'failure'
         with:
-          # NOTE: To make the downloads of the test results easier to use (i.e. when downloading test results
-          #   from different runs), we'll add an id to the name.
-          #
-          #   We don't just use the sha because this workflow also runs on a schedule - which means that different
-          #   runs would again create files with the same name (e.g. two consecutive scheduled runs while the
-          #   repo hasn't changed in the meantime).
-          #
-          #   Instead we use 'github.run_number' because this gives us the same number that's also shown in the
-          #   ui - like 27 for run #27 ('github.run_id' on the other hand gives us some "random" big number like
-          #   1152888876 - which is less useful). For more details, see:
-          #   https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#github-context
-          #
-          # NOTE: We put the "run_number" first so that the result zip file can be sorted by name.
+          # NOTES:
+          #   * To make the downloads of the test results easier to use (i.e. when downloading test results
+          #     from different runs), we'll add the run number to the name.
+          #   * The name is used by the test reported step in ci.yaml.
           name: 'test-results-#${{ github.run_number }}-${{ steps.short-sha.outputs.sha }}-${{ runner.os }}'
           path: '**/*.trx'
           if-no-files-found: error
