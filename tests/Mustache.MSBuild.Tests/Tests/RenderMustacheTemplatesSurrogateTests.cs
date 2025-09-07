@@ -252,11 +252,11 @@ public sealed class RenderMustacheTemplatesSurrogateTests
 
     private sealed class MsBuildTestLogger : IMsBuildLogger
     {
-        public List<string> Messages { get; } = new();
+        public List<string> Messages { get; } = [];
 
-        public List<string> Warnings { get; } = new();
+        public List<string> Warnings { get; } = [];
 
-        public List<Exception> Exceptions { get; } = new();
+        public List<Exception> Exceptions { get; } = [];
 
         /// <inheritdoc />
         public void LogMessage(string message, params object[] messageArgs)
