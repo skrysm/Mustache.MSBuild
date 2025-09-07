@@ -28,7 +28,7 @@
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
 
     <!-- Do not put the built assembly into the NuGet package directly - to prevent the consuming project
-         from accidentially using the types in the assembly. Instead the assembly is placed in the "tools"
+         from accidentially using the types in the assembly. Instead, the assembly is placed in the "tools"
          folder (see below).
     -->
     <IncludeBuildOutput>false</IncludeBuildOutput>
