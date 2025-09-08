@@ -1,13 +1,18 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright Mustache.MSBuild (https://github.com/skrysmanski/Mustache.MSBuild)
 
+using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
 
 using AppMotor.CoreKit.Processes;
 using AppMotor.TestKit;
 
 using JetBrains.Annotations;
+
+using Mustache.MSBuild.TestUtils;
 
 using Newtonsoft.Json;
 
@@ -24,8 +29,6 @@ namespace Mustache.MSBuild.Tests;
 /// </summary>
 public sealed class EndToEndTests
 {
-    private const string NUGET_PACKAGE_NAME = "Mustache.MSBuild";
-
     private readonly ITestOutputHelper _testOutputHelper;
 
     private readonly string _projectDir;
@@ -37,11 +40,13 @@ public sealed class EndToEndTests
         this._projectDir = Path.GetFullPath("TemplateSampleProject");
         this._testOutputHelper.WriteLine($"Project dir: {this._projectDir}");
 
+        var targetFramework = DetermineTargetFramework();
+        this._testOutputHelper.WriteLine($"Target framework: {targetFramework}");
+
         Directory.CreateDirectory(this._projectDir);
 
-        var buildPackagesDir = Path.GetFullPath("TestResources/built-packages");
-        CreateNuGetConfig(this._projectDir, buildPackagesDir);
-        CreateTestProjectFile(this._projectDir, buildPackagesDir);
+        CreateNuGetConfig(this._projectDir);
+        CreateTestProjectFile(this._projectDir, targetFramework);
 
         DeleteDirectory($"{this._projectDir}/bin");
         DeleteDirectory($"{this._projectDir}/obj");
@@ -49,7 +54,19 @@ public sealed class EndToEndTests
 
         // NOTE: The file must exist so that MSBuild can pick it up as file to be compiled.
         //   However, we clear it to see that file generation actually works.
-        File.WriteAllText($"{this._projectDir}/Program.cs", "");
+        File.WriteAllText($"{this._projectDir}/Program.cs", contents: "");
+    }
+
+    [MustUseReturnValue]
+    private static string DetermineTargetFramework()
+    {
+        var targetFrameworkAttribute = typeof(EndToEndTests).Assembly.GetCustomAttribute<TargetFrameworkAttribute>();
+        targetFrameworkAttribute.ShouldNotBeNull();
+
+        var match = Regex.Match(targetFrameworkAttribute.FrameworkName, @",Version=v(\d+\.\d+)", RegexOptions.IgnoreCase);
+        match.Success.ShouldBe(true);
+
+        return $"net{match.Groups[1].Value}";
     }
 
     /// <summary>
@@ -181,8 +198,9 @@ public sealed class EndToEndTests
         return msBuildPath;
     }
 
-    private static void CreateNuGetConfig(string projectDir, string builtPackageDir)
+    private static void CreateNuGetConfig(string projectDir)
     {
+        var builtPackageDir = BuiltPackagesUtils.GetBuiltPackagesDir();
         Directory.Exists(builtPackageDir).ShouldBe(true, $"Built Packages Dir: {builtPackageDir}");
 
         // language=xml
@@ -201,7 +219,7 @@ public sealed class EndToEndTests
             <package pattern=""*"" />
         </packageSource>
         <packageSource key=""LocalTest"">
-            <package pattern=""{NUGET_PACKAGE_NAME}"" />
+            <package pattern=""{BuiltPackagesUtils.NUGET_PACKAGE_NAME}"" />
         </packageSource>
     </packageSourceMapping>
 </configuration>
@@ -210,33 +228,24 @@ public sealed class EndToEndTests
         File.WriteAllText($"{projectDir}/NuGet.config", fileContents.TrimStart());
     }
 
-    private void CreateTestProjectFile(string projectDir, string builtPackageDir)
+    private void CreateTestProjectFile(string projectDir, string targetFramework)
     {
-        var nuGetPackages = Directory.EnumerateFiles(builtPackageDir, $"{NUGET_PACKAGE_NAME}.*.nupkg").Select(Path.GetFileName).ToList();
-        nuGetPackages.Count.ShouldBe(1, $"Found more than one NuGet package: {string.Join(", ", nuGetPackages)}");
+        var nugetPackage = BuiltPackagesUtils.GetMustacheMsbuildPackage();
 
-        var selectedNuGetPackage = nuGetPackages[0];
-        selectedNuGetPackage.ShouldNotBeNull();
-
-        var packageVersionRegex = new Regex($@"^{Regex.Escape(NUGET_PACKAGE_NAME)}\.(.+)\.nupkg$", RegexOptions.IgnoreCase);
-        var match = packageVersionRegex.Match(selectedNuGetPackage);
-        match.Success.ShouldBe(true);
-
-        var version = match.Groups[1].Value;
-        this._testOutputHelper.WriteLine($"Found NuGet version: {version}");
+        this._testOutputHelper.WriteLine($"Found NuGet version: {nugetPackage.Version}");
 
         // language=xml
         string projectFileContents = $@"
 <Project Sdk=""Microsoft.NET.Sdk"">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>{targetFramework}</TargetFramework>
         <OutputType>Exe</OutputType>
         <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include=""{NUGET_PACKAGE_NAME}"" Version=""{version}"">
+        <PackageReference Include=""{BuiltPackagesUtils.NUGET_PACKAGE_NAME}"" Version=""{nugetPackage.Version}"">
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
     </ItemGroup>
