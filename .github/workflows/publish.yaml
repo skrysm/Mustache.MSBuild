@@ -41,7 +41,7 @@ jobs:
       - name: Collect NuGet packages from 'Build & Test' job
         uses: actions/download-artifact@v4
         with:
-          name: nuget-packages
+          name: nuget-packages-Linux
           path: artifacts
 
       - name: Push to nuget.org (idempotent)
