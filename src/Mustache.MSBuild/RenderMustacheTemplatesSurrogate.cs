@@ -3,7 +3,6 @@
 
 using System.IO.Abstractions;
 
-using Microsoft.Build.Framework;
 using Mustache.MSBuild.DataTypes;
 using Mustache.MSBuild.Services;
 using Mustache.MSBuild.Utils;
@@ -26,9 +25,9 @@ internal sealed class RenderMustacheTemplatesSurrogate
         this._templatesFileService = new TemplatesFileService(fileSystem);
     }
 
-    public bool Execute(ITaskItem[]? templatePaths, IMsBuildLogger logger)
+    public bool Execute(IEnumerable<string>? templatePaths, IMsBuildLogger logger)
     {
-        if (templatePaths is null || templatePaths.Length == 0)
+        if (templatePaths is null)
         {
             return true;
         }
@@ -39,7 +38,7 @@ internal sealed class RenderMustacheTemplatesSurrogate
         {
             try
             {
-                var templatePathDescriptor = TemplatePathDescriptor.ForTemplateFile(pathToMustacheFile: templatePath.ItemSpec, this._fileSystem);
+                var templatePathDescriptor = TemplatePathDescriptor.ForTemplateFile(pathToMustacheFile: templatePath, this._fileSystem);
 
                 if (!this._fileSystem.File.Exists(templatePathDescriptor.PathToMustacheFile.FullPath))
                 {

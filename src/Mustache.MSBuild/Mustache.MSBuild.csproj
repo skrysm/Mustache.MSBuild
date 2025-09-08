@@ -36,11 +36,6 @@
     <NoWarn>NU5128</NoWarn>
   </PropertyGroup>
 
-  <ItemGroup>
-    <!-- Include the built assembly in the "tools" folder in the NuGet package. -->
-    <None Include="$(TargetPath)" Pack="true" PackagePath="tools" Visible="false" />
-  </ItemGroup>
-
   <PropertyGroup Label="NuGet package properties">
     <Description>Renders Mustache templates when compiling projects. Uses JSON as data files.</Description>
 
@@ -59,7 +54,11 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
-  <ItemGroup>
+  <ItemGroup Label="NugetPackageContents">
+
+    <!-- Include the built assembly from "bin" folder in the "tools" folder in the NuGet package. -->
+    <None Include="$(TargetPath)" Pack="true" PackagePath="tools" Visible="false" />
+
     <!-- IMPORTANT: Must set "Pack" "True" to be included in the NuGet package.
          IMPORTANT 2: The folder "build" (inside a NuGet package) is special. Any .target or .props file in
             this folder is automatically imported in each project (file) that references the NuGet package.
@@ -73,21 +72,11 @@
          is up-to-date and not build it.
     -->
     <UpToDateCheckInput Include="build\*.*" />
-  </ItemGroup>
 
-  <!-- Remove bin directory from project. Is needed but I'm not sure why. -->
-  <ItemGroup>
-    <Compile Remove="bin\**" />
-    <EmbeddedResource Remove="bin\**" />
-    <None Remove="bin\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="Version.props" Pack="True" PackagePath="\" />
-  </ItemGroup>
 
-  <ItemGroup>
     <None Include="..\..\README.md" Link="README.md" Pack="True" PackagePath="\" />
+
   </ItemGroup>
 
   <!-- We use "Costura.Fody" to bundle all dependencies inside the resulting assembly.
@@ -96,11 +85,8 @@
   -->
   <ItemGroup>
     <PackageReference Include="AppMotor.NetStandardCompatKit" Version="0.2.2" />
-    <PackageReference Include="Costura.Fody" Version="6.0.0">
-      <!-- This is a dev dependency. -->
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.14.8" />
+    <PackageReference Include="Costura.Fody" Version="6.0.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.14.8" PrivateAssets="all" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Stubble.Core" Version="1.10.8" />
     <PackageReference Include="TestableIO.System.IO.Abstractions" Version="22.0.15" />
