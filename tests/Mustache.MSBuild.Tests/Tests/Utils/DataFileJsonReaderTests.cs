@@ -8,7 +8,6 @@ using Mustache.MSBuild.Utils;
 using Shouldly;
 
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Mustache.MSBuild.Tests.Utils;
 

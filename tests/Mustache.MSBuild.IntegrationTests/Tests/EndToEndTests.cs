@@ -2,7 +2,6 @@
 // Copyright Mustache.MSBuild (https://github.com/skrysmanski/Mustache.MSBuild)
 
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
@@ -19,7 +18,6 @@ using Newtonsoft.Json;
 using Shouldly;
 
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Mustache.MSBuild.Tests;
 
@@ -111,10 +109,10 @@ public sealed class EndToEndTests
     /// <summary>
     /// Executes the test with MSBuild (.NET Framework). This is how Visual Studio will use this package. Only works on Windows.
     /// </summary>
-    [SkippableFact]
+    [Fact]
     public void Test_Execute_MsBuild()
     {
-        Skip.IfNot(OperatingSystem.IsWindows());
+        Assert.SkipUnless(OperatingSystem.IsWindows(), "only on Windows");
 
         // Setup
         CreateTemplateFile(secondContent: false);
