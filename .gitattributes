@@ -97,3 +97,9 @@
 # Helper scripts present in most repositories
 /git-clean.* linguist-vendored
 /git-clone-submodules.* linguist-vendored
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#
+# Repository custom attributes
+#

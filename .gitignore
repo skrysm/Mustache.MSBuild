@@ -24,7 +24,6 @@
 # See: https://en.wikipedia.org/wiki/.DS_Store
 .DS_Store
 
-
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #
@@ -55,6 +54,7 @@ launchSettings.json
 *.nupkg
 build-packages/
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #
 # Repository custom ignores

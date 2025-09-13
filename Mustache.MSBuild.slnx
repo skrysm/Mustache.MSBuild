@@ -1,0 +1,30 @@
+<Solution>
+  <Folder Name="/_SolutionItems/">
+    <File Path=".editorconfig" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Build.targets" />
+  </Folder>
+  <Folder Name="/_SolutionItems/_ProjectCommons/">
+    <File Path="_ProjectCommons/CA.globalconfig" />
+    <File Path="_ProjectCommons/Common.Directory.Build.props" />
+    <File Path="_ProjectCommons/Common.Directory.Build.targets" />
+    <File Path="_ProjectCommons/Project.Code.props" />
+    <File Path="_ProjectCommons/Project.Code_Packages.props" />
+    <File Path="_ProjectCommons/Project.NuGetPackage.props" />
+    <File Path="_ProjectCommons/Project.NuGetPackage_Post.props" />
+    <File Path="_ProjectCommons/Project.Sample.props" />
+    <File Path="_ProjectCommons/Project.Shared.props" />
+    <File Path="_ProjectCommons/Project.Shared_Post.props" />
+    <File Path="_ProjectCommons/Project.Tests.props" />
+    <File Path="_ProjectCommons/Project.Tests_Packages.props" />
+    <File Path="_ProjectCommons/Project.Tool.props" />
+    <File Path="_ProjectCommons/StyleGuide.globalconfig" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="tests/Mustache.MSBuild.IntegrationTests/Mustache.MSBuild.IntegrationTests.csproj">
+      <BuildDependency Project="src/Mustache.MSBuild/Mustache.MSBuild.csproj" />
+    </Project>
+    <Project Path="tests/Mustache.MSBuild.Tests/Mustache.MSBuild.Tests.csproj" />
+  </Folder>
+  <Project Path="src/Mustache.MSBuild/Mustache.MSBuild.csproj" />
+</Solution>

@@ -60,9 +60,7 @@ indent_size = 2
 [*.{bat,cmd}]
 end_of_line = crlf
 
-
-#################################################################################
-
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 #
 # C# files
@@ -118,12 +116,18 @@ indent_size = 2
 [*.sln]
 # Visual Studio creates .sln files with BOM.
 charset = utf-8-bom
-
+end_of_line = crlf
 # .sln files require tabs or the solution won't load
 indent_style = tab
 indent_size = 4
 
+
+[*.slnx]
+# Visual Studio creates .sln files with BOM.
+charset = utf-8-bom
 end_of_line = crlf
+indent_style = space
+indent_size = 2
 
 
 #
@@ -133,3 +137,9 @@ end_of_line = crlf
 # ReSharper creates .DotSettings files with BOM.
 charset = utf-8-bom
 indent_style = tab
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#
+# Repository custom settings
+#
